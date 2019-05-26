@@ -530,7 +530,15 @@ class CmpOp(_Op):
         if self._field_ext:
             field += '.' + self._field_ext
 
-        if not self.is_negated:
+        if self._operator == '$eq':
+            int_match = re.match("\d+", self._constant)
+            float_match = re.match("\d+\.\d+", self._constant)
+            if int_match and int_match.span() == (0, len(self._constant)):
+                self._constant = int(self._constant)
+            if float_match and float_match.span() == (0, len(self._constant)):
+                self._constant = float(self._constant)
+            return {field: self._constant}
+        elif not self.is_negated:
             return {field: {self._operator: self._constant}}
         else:
             return {field: {'$not': {self._operator: self._constant}}}
